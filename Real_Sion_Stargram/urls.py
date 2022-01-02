@@ -14,11 +14,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from .views import Sub
-from content.views import Main
+from content.views import Main, UploadFeed
+from django.conf import settings
+from .settings import MEDIA_URL, MEDIA_ROOT
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',Main.as_view()) # 뒤에할꺼는 view에 만들자
+    path('main/', Main.as_view()),  # 뒤에할꺼는 view에 만들자
+    path('content/', include('content.urls')),
+    path('user/', include('user.urls')),
+
+    # post로 호출할때는 뒤에 / 를 빼야함
 ]
+
+urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
+# 파일 미디어 넣을려고

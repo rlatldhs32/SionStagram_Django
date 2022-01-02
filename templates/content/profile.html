@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% load static %}
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+
+    <!-- 요기에 구글 머티리얼 아이콘 -->
+    <link
+            href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
+            rel="stylesheet">
+    <!-- 제이쿼리 사용-->
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+
+    <title> SionStargram </title>
+</head>
+
+<style>
+    .modal_overlay {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(1.5px);
+        -webkit-backdrop-filter: blur(1.5px);
+    }
+
+    .modal_window {
+        background: white;
+        backdrop-filter: blur(13.5px);
+        -webkit-backdrop-filter: blur(13.5px);
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        width: 800px;
+        height: 600px;
+        position: relative;
+        padding: 10px;
+    }
+
+    .main_body {
+        display: flex;
+        justify-content: center;
+        padding-top: 50px;
+        background-color: #FAFAFA;
+    }
+
+    .left_body {
+    {#background-color: skyblue;#} margin-right: 100px;
+        width: 500px;
+        height: 2000px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .right_body {
+    {#background-color: yellow;#} padding-top: 20px;
+        width: 300px;
+        height: 1000px;
+        left: 72%;
+        z-index: 1;
+    }
+
+    .feed_box {
+        background-color: white;
+        width: 480px;
+        margin: 10px;
+        min-height: auto;
+        padding-bottom: 10px;
+    }
+
+    .feed_img {
+        width: 100%;
+        object-fit: contain;
+    }
+
+    .feed_content {
+        padding: 0px 10px;
+    }
+
+    .feed_like {
+        padding: 0px 10px;
+    }
+
+    .feed_reply {
+        padding: 0px 10px;
+        display: flex;
+        flex-direction: column;
+    }
+
+
+    .feed_txt {
+        font-size: 14px;
+    }
+
+
+    .feed_icon {
+        padding: 5px 5px 0px 5px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    span {
+        padding-right: 5px;
+    }
+
+    .feed_name {
+        padding: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+    .feed_name_txt {
+        font-size: 14px;
+        padding: 0px 10px;
+        font-weight: bold;
+    }
+
+    .profile_box {
+        width: 40px;
+        height: 40px;
+        border-radius: 70%;
+        overflow: hidden;
+    }
+
+    .profile_img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .name_content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .name_content_txt {
+        font-size: 12px;
+        padding: 0px 10px;
+        font-weight: bold;
+        color: lightgray;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 190px;
+    }
+
+    .big_profile_box {
+        width: 60px;
+        height: 60px;
+        border-radius: 70%;
+        overflow: hidden;
+    }
+
+    .link_txt {
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        z-index: 1;
+    }
+
+    .recommend_box {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        align-items: center;
+    }
+
+    .comment_box {
+        margin: 40px 0 0 5px;
+        font-size: 12px;
+        font-weight: bold;
+        color: lightgray;
+        display: flex;
+        flex-direction: column;
+    }
+
+</style>
+
+<body>
+<!-- 상단 내비게이션 바 -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom"
+     style="width: 100%;height: 50px;position: fixed; ">
+    <div class="container">
+        <img style="height: 30px; object-fit: contain"
+             src="https://www.instagram.com/static/images/web/mobile_nav_type_logo-2x.png/1b47f9d0e595.png">
+        <input class="form-control" style="width: 200px" type="search" placeholder="Search" aria-label="Search">
+        <div style="display: flex">
+            <span class="material-icons" style="padding-right: 10px">home</span>
+            <span id="nav_bar_add_box" class="material-icons-outlined" style="padding-right: 10px">add_box</span>
+
+            <div class="dropdown">
+                <a href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="profile_box" style="width: 25px; height: 25px">
+                        <img class="profile_img"
+                             src="https://i.pinimg.com/736x/93/a6/8b/93a68b57a54e4bdc73d43d1d049b94b3.jpg">
+                    </div>
+
+                </a>
+
+                <ul class="dropdown-menu" style="left:-158px; z-index: 100" aria-labelledby="dropdownMenuLink">
+                    <li><a class="dropdown-item" href="#">프로필</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/user/logout">로그아웃</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+
+</body>
+</html>
