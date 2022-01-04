@@ -68,6 +68,7 @@
         width: 300px;
         height: 1000px;
         left: 72%;
+        position: fixed;
         z-index: 1;
     }
 
@@ -193,27 +194,33 @@
 <body>
 <!-- 상단 내비게이션 바 -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom"
-     style="width: 100%;height: 50px;position: fixed; ">
-    <div class="container">
-        <img style="height: 30px; object-fit: contain"
-             src="https://www.instagram.com/static/images/web/mobile_nav_type_logo-2x.png/1b47f9d0e595.png">
+     style="width: 100%;height: 50px;position: fixed; padding:0px ; z-index: 999">
+    <div class="container" style="max-width: 1500px;padding: 0px; margin: 0px">
+        <a href="/main">
+            <img style="height: 30px; object-fit: contain"
+                 src="https://www.instagram.com/static/images/web/mobile_nav_type_logo-2x.png/1b47f9d0e595.png">
+        </a>
         <input class="form-control" style="width: 200px" type="search" placeholder="Search" aria-label="Search">
         <div style="display: flex">
-            <span class="material-icons" style="padding-right: 10px">home</span>
+            <a href="/main">
+                <span class="material-icons" style="padding-right: 10px">home</span>
+            </a>
             <span id="nav_bar_add_box" class="material-icons-outlined" style="padding-right: 10px">add_box</span>
 
             <div class="dropdown">
                 <a href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
                     <div class="profile_box" style="width: 25px; height: 25px">
                         <img class="profile_img"
-                             src="https://i.pinimg.com/736x/93/a6/8b/93a68b57a54e4bdc73d43d1d049b94b3.jpg">
+                             src="{% get_media_prefix %}{{ user.profile_image }}">
                     </div>
 
                 </a>
 
                 <ul class="dropdown-menu" style="left:-158px; z-index: 100" aria-labelledby="dropdownMenuLink">
-                    <li><a class="dropdown-item" href="#">프로필</a></li>
-                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="/content/profile">프로필</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
                     <li><a class="dropdown-item" href="/user/logout">로그아웃</a></li>
                 </ul>
             </div>
@@ -228,17 +235,19 @@
             <div class="border feed_box">
                 <div class="feed_name">
                     <div class="profile_box">
-                        <img class="profile_img" src="{{ feed.profile_image }}">
+                        <img class="profile_img" src="{% get_media_prefix %}{{ feed.profile_image }}">
                     </div>
-                    <span class="feed_name_txt"> {{ feed.user_id }}</span>
+                    <span class="feed_name_txt"> {{ feed.nickname }}</span>
                 </div>
                 <img class="feed_img" src="{% get_media_prefix %}{{ feed.image }}">
 
                 <div class="feed_icon">
                     <div>
-          <span class="material-icons-outlined">
-            favorite_border
-          </span>
+                        <span id="favorite_{{ feed.id }}" feed_id="{{ feed.id }}"
+                              class="favorite material-icons-outlined"
+                              style="color:red;cursor:pointer">{% if feed.is_like %}
+                            favorite{% else %}favorite_border{% endif %}</span>
+
                         <span class="material-icons-outlined">
             mode_comment
           </span>
@@ -247,21 +256,37 @@
           </span>
                     </div>
                     <div>
-          <span class="material-icons-outlined">
-            turned_in_not
+          <span id="bookmark_{{ feed.id }}"  feed_id="{{ feed.id }}" class="bookmark material-icons-outlined" style="cursor: pointer">
+              {% if feed.is_marked %}
+                  bookmark
+              {% else %}
+                  bookmark_border
+              {% endif %}
           </span>
                     </div>
                 </div>
                 <div class="feed_like">
-                    <p class="feed_txt"><b>좋아요 {{ feed.like_count }}개</b></p>
+                    <p style="height: 10px" class="feed_txt"><b>좋아요 {{ feed.like_count }}개</b></p>
                 </div>
                 <div class="feed_content">
-                    <p class="feed_txt"><b> {{ feed.user_id }} </b> {{ feed.content }}
+                    <p style="height: 17px" class="feed_txt"><b> {{ feed.user_id }} </b> {{ feed.content }}
                     </p>
                 </div>
                 <div class="feed_reply">
-                    <span class="feed_txt"> <b> mychew </b> 제주도 가고 싶어요 ㅠㅠ</span>
-                    <span class="feed_txt"> <b> cho </b> 제주도  ㄱ ㄱ </span>
+                    <div id="reply_list_{{ feed.id }}">
+                        {% for reply in feed.reply_list %}
+                            <div class="feed_txt"><b> {{ reply.nickname }} </b> {{ reply.reply_content }}</div>
+                        {% endfor %}
+                    </div>
+                    <div style="display:flex; flex-direction: row; align-items: center;border-top:solid 1px gray">
+                        <input id="reply_{{ feed.id }}" type="text" class="form_control"
+                               style="color: gray ;width: 500px;border:none;border-right:0px; border-top:0px; boder-left:0px; boder-bottom:0px;"
+                               placeholder="댓글달기..">
+                        <div feed_id="{{ feed.id }}" class="upload_reply"
+                             style="width:50px; color: cornflowerblue;font-weight: bold">
+                            게시
+                        </div>
+                    </div>
                 </div>
             </div>
         {% endfor %}
@@ -271,7 +296,7 @@
             <div style="display: flex; align-items: center; ">
                 <div class="big_profile_box">
                     <img class="profile_img"
-                         src="https://scontent-ssn1-1.xx.fbcdn.net/v/t1.6435-9/s1080x2048/165180104_277246477102900_6106347261862438192_n.jpg?_nc_cat=102&ccb=1-5&_nc_sid=730e14&_nc_ohc=1sN4d8i7rn8AX-7aKYN&_nc_ht=scontent-ssn1-1.xx&oh=5049b7cd176848e330b0f5ea95f28172&oe=615A08D1">
+                         src="{% get_media_prefix %}{{ user.profile_image }}">
                 </div>
                 <div class="name_content">
                     <span class="feed_name_txt"> {{ user.nickname }} </span>
@@ -380,7 +405,7 @@
 -->
 
 <!-- 첫번쨰 모달 -->
-<div id="first_modal" class="modal_overlay">
+<div id="first_modal" class="modal_overlay" style="z-index: 10000">
     <div class="modal_window">
         <div style="border-bottom: solid 1px gray;display:flex; flex-direction:row; justify-content:space-between">
             <div style="width:40px">
@@ -390,7 +415,7 @@
                 새이미지 업로드
             </div>
             <div>
-                <span class="material-icons-outlined">close</span>
+                <span class="modal_close material-icons-outlined">close</span>
             </div>
         </div>
         <div class="img_upload_space" style=" width:770px;height: 540px;margin-top: 10px">
@@ -410,7 +435,7 @@
                 새이미지 업로드
             </div>
             <div>
-                <span class="material-icons-outlined">close</span>
+                <span class="modal_close material-icons-outlined">close</span>
             </div>
         </div>
         <div style="display:flex;flex-direction: row">
@@ -434,8 +459,120 @@
 
 
 <script>
+
+    $('.bookmark').click(function (e) {
+        let feed_id = e.target.attributes.getNamedItem('feed_id').value
+        let bookmark_id = e.target.id;
+        let bookmark_text = $.trim($('#' + bookmark_id).html())
+        if (bookmark_text == 'bookmark') {
+            $('#' + bookmark_id).html('bookmark_border')
+        } else {
+            $('#' + bookmark_id).html('bookmark')
+        }
+
+        $.ajax({
+            url: "/content/bookmark",
+            data: {
+                feed_id: feed_id,
+                bookmark_text: bookmark_text,
+
+            },//파일 넘기는지, 데이터 넘기는지
+            method: "POST",
+            success: function (data) {
+                console.log("성공")
+            },
+            error: function (request, status, error) {
+                console.log("에러")
+            },
+            complete: function () {
+                console.log("완료");
+            },
+        })
+
+    })
+
+
+    $('.favorite').click(function (e) {
+        let feed_id = e.target.attributes.getNamedItem('feed_id').value
+        let favorite_id = e.target.id;
+        let favorite_text = $.trim($('#' + favorite_id).html())
+        if (favorite_text == 'favorite') {
+            $('#' + favorite_id).html('favorite_border')
+        } else {
+            $('#' + favorite_id).html('favorite')
+        }
+
+        $.ajax({
+            url: "/content/like",
+            data: {
+                feed_id: feed_id,
+                favorite_text: favorite_text,
+
+            },//파일 넘기는지, 데이터 넘기는지
+            method: "POST",
+            success: function (data) {
+                console.log("성공")
+            },
+            error: function (request, status, error) {
+                console.log("에러")
+            },
+            complete: function () {
+                console.log("완료");
+            },
+        })
+
+    })
+
+
+    $(".upload_reply").click(function (e) { //눌렀을때 event
+        let feed_id = e.target.attributes.getNamedItem('feed_id').value
+        let reply_id = 'reply_' + feed_id
+        let reply_content = $('#' + reply_id).val();
+
+        if (reply_content.length <= 0) {
+            alert("댓글을 입력하세요.");
+            return 0;
+        }
+
+        $.ajax({
+            url: "/content/reply",
+            data: {
+                feed_id: feed_id,
+                reply_content: reply_content,
+
+            },//파일 넘기는지, 데이터 넘기는지
+            method: "POST",
+            success: function (data) {
+                console.log("성공")
+                alert("댓글 성공했습니다.")
+                $('#reply_list_' + feed_id).append("<div class='feed_txt'> <b> {{ user.nickname }} </b> " + reply_content + " </div>")
+                {#location.replace("/main")#}
+                //페이지 새로고침 안하고 div만 생성해보자!
+            },
+            error: function (request, status, error) {
+                console.log("에러")
+            },
+            complete: function () {
+                console.log("완료");
+                $('#' + reply_id).val('')
+            },
+        })
+
+
+    })
+
+
     let files;
 
+    $('.modal_close').click(function () {
+        $('#first_modal').css({
+            display: "none",
+        })
+        $(document.body).css({
+            overflow: "none"
+        });
+
+    })
     $('#nav_bar_add_box').click(function () {
         $('#first_modal').css({
             display: "flex",
@@ -449,15 +586,11 @@
         let file = files[0];
         let image = file.name;
         let content = $('#input_feed_content').val();
-        let user_id = "Sion123";
-        let profile_image = "https://www.theguru.co.kr/data/photos/20210937/art_16316071303022_bf8378.jpg";
 
         let fd = new FormData;
         fd.append('file', file);
         fd.append('image', image);
         fd.append('content', content);
-        fd.append('user_id', user_id);
-        fd.append('profile_image', profile_image);
 
         //data만 넘기는 restful 형태의 api에서는 json형태로 데이터 왔다갔다
         //파일은 form 데이터 형태로 주고받음!!
@@ -475,7 +608,7 @@
             },
             complete: function () {
                 console.log("완료");
-                location.replace("main/");
+                location.replace("");
             },
         })
 
